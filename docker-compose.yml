@@ -1,0 +1,50 @@
+version: "3.8"
+services:
+  mysql:
+    container_name: mysql_db
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: oluwatosin
+      MYSQL_DATABASE: devOpsProject
+      MYSQL_USER: root
+      MYSQL_PASSWORD: oluwatosin
+      PGDATA: /data/postgres
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - mysql_network
+    restart: on-failure
+
+  app:
+    build: .
+    image: joshrichhy/period
+    ports:
+      - "8890:8890"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: default_db
+      POSTGRES_HOST: postgresDB
+      DATABASE_URL: postgres://postgres:postgres@postgresDB:5432/default_db?sslmode=disable
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresDB:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      PORT: "8890"
+    depends_on:
+      - postgresDB
+    networks:
+      - periodapp_web_net
+    volumes:
+      - .:/usr/src/app
+    restart: on-failure:3
+
+
+networks:
+  periodapp_web_net:
+    driver: bridge
+volumes:
+  periodapp_web_db_data:
